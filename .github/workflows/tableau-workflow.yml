@@ -3,7 +3,7 @@ name: Tableau Workbook Workflows
 on:
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   tableau-validation-action:
@@ -43,3 +43,4 @@ jobs:
           workbook_dir: tests/workbooks
           env: production
           repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - run: echo "test"
