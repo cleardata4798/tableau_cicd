@@ -3,7 +3,7 @@ name: Tableau Workbook Workflows
 on:
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   tableau-validation-action:
