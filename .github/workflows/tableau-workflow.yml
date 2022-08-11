@@ -20,8 +20,7 @@ jobs:
           SITE_ID: ${{ secrets.SITE_ID }}
           TABLEAU_URL: ${{ secrets.TABLEAU_URL }}
         with:
-          workbook_dir: ${{ env.GITHUB_WORKSPACE }}
-          env: staging
+          workbook_dir: ./
           repo_token: ${{ secrets.GITHUB_TOKEN }}
 
   tableau-production-publishing:
