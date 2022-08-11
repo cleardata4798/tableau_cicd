@@ -43,4 +43,4 @@ jobs:
           workbook_dir: tests/workbooks
           env: production
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-      - run: echo "test"
+      - run: echo "tesst"
