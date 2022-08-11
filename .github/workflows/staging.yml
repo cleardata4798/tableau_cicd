@@ -1,0 +1,25 @@
+name: Tableau Workbook Workflows
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  tableau-validation-action:
+    name: Tableau Workbook Staging Publisher
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: "Tableau Workbook Action - Staging"
+        uses: jayamanikharyono/tableau-workbook-action@v1.4
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          SITE_ID: ${{ secrets.SITE_ID }}
+          TABLEAU_URL: ${{ secrets.TABLEAU_URL }}
+        with:
+          workbook_dir: workbooks
+          env: staging
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
