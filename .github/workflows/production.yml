@@ -16,7 +16,7 @@ jobs:
 
       - name: "Tableau Workbook Action - Production"
         if: github.event.pull_request.merged == true
-        uses: jayamanikharyono/tableau-workbook-action@v1.4
+        uses: jayamanikharyono/tableau-workbook-action@v1.3
         env:
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
