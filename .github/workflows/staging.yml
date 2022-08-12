@@ -12,6 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install XPATH
+        run: apt-get install -y libxml-xpath-perl
+
       - name: Tableau Login
         run: |
           curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.9/auth/signin' \
