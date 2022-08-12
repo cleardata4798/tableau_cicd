@@ -1,4 +1,4 @@
-name: Tableau Workbook Workflows
+name: Tableau Workbook Workflows - Production
 
 on:
   pull_request:
