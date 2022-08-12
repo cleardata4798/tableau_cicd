@@ -22,5 +22,10 @@ jobs:
             </credentials>
           </tsRequest>' > login.xml
 
-          echo "Login done with success \n\n"
-          cat login.xml
+          TOKEN=$(xpath -q -e "string(//@token)" login.xml)
+          SITE_ID=$(xpath -q -e "string(//site/@id)" login.xml)
+
+          echo "TOKEN=${TOKEN}" >> $GITHUB_ENV
+          echo "SITE_ID=${SITE_ID}" >> $GITHUB_ENV
+
+          echo "Login done with success"
