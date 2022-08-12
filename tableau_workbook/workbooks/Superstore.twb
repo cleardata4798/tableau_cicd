@@ -2243,7 +2243,7 @@
       <table>
         <view>
           <datasources>
-            <datasource caption='Sample - Superstore' name='federated.10nnk8d1vgmw8q17yu76u06pnbcj' />
+            <datasource caption='Sample - Superstore XX' name='federated.10nnk8d1vgmw8q17yu76u06pnbcj' />
           </datasources>
           <datasource-dependencies datasource='federated.10nnk8d1vgmw8q17yu76u06pnbcj'>
             <column caption='Days to Ship Actual' datatype='integer' name='[Calculation_0831103151444568]' role='measure' type='quantitative'>
