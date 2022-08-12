@@ -1,7 +1,7 @@
 workbooks:
   - name: Superstore
     file_path: Superstore.twb
-    project_path: Superstore
+    project_path: Dashboard/Superstore
     option:
       tags:
         - sample

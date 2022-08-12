@@ -12,14 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: "Tableau Workbook Action - Staging"
-        uses: jayamanikharyono/tableau-workbook-action@v1.4
-        env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          SITE_ID: ${{ secrets.SITE_ID }}
-          TABLEAU_URL: ${{ secrets.TABLEAU_URL }}
-        with:
-          workbook_dir: tableau_workbook/workbooks
-          env: staging
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tableau Login
+        run: |
+          curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.9/auth/signin' \
+          --header 'Content-Type: application/xml' \
+          --data-raw '<tsRequest>
+            <credentials name="${{ secrets.USERNAME }}" password="${{ secrets.PASSWORD }}">
+              <site contentUrl="${{ secrets.SITE }}" />
+            </credentials>
+          </tsRequest>' > login.xml
+
+          echo "Login done with success \n\n"
+          cat login.xml
