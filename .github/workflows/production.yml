@@ -23,6 +23,6 @@ jobs:
           SITE_ID: ${{ secrets.SITE_ID }}
           TABLEAU_URL: ${{ secrets.TABLEAU_URL }}
         with:
-          workbook_dir: workbooks
+          workbook_dir: tableau_workbook/workbooks
           env: production
           repo_token: ${{ secrets.GITHUB_TOKEN }}
