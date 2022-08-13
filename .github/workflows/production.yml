@@ -45,6 +45,8 @@ jobs:
               description="Production workbooks" />
           </tsRequest>' > /dev/null 2>&1
 
+          sleep 10s
+
       - name: Get project id
         run: |
           curl --location --request GET '${{ secrets.TABLEAU_URL }}/api/3.9/sites/${{ env.SITE_ID }}/projects?filter=name:eq:${{ secrets.PRODUCTION_PROJECT }}' \
@@ -74,12 +76,16 @@ jobs:
           -F "request_payload=@publish-workbook.xml" \
           -F "tableau_workbook=@${{ secrets.WORKBOOK_FILE }}"
 
+          sleep 10s
+
           # assure to upload latest version (overwriting)
           curl -v --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks?overwrite=true' \
           -H "X-Tableau-Auth: ${{ env.TOKEN }}" \
           -H "Content-Type: multipart/mixed; boundary=boundary-string" \
           -F "request_payload=@publish-workbook.xml" \
           -F "tableau_workbook=@${{ secrets.WORKBOOK_FILE }}"
+
+          sleep 10s
 
       - name: Cleanning created files
         run: rm publish-workbook.xml login.xml project.xml
