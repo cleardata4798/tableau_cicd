@@ -40,7 +40,7 @@ jobs:
           --header 'Content-Type: application/xml' \
           --data-raw '<tsRequest>
             <project
-              name="STAGING"
+              name="VALIDATION"
               description="Staging workbooks" />
           </tsRequest>' > /dev/null 2>&1
 

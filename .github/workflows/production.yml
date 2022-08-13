@@ -41,7 +41,7 @@ jobs:
           --header 'Content-Type: application/xml' \
           --data-raw '<tsRequest>
             <project
-              name="PRODUCTION"
+              name="PROD"
               description="Production workbooks" />
           </tsRequest>' > /dev/null 2>&1
 
