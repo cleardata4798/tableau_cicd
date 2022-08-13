@@ -75,5 +75,5 @@ jobs:
           curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks' \ 
           --header 'X-Tableau-Auth: ${{ env.TOKEN }}' \
           --header 'Content-Type: multipart/mixed' \
-          -F "request_payload=@publish-workbook.xml" \
-          -F "tableau_workbook=@Superstore.twb"
+          -F "request_payload=@${{ github.workspace }}/publish-workbook.xml" \
+          -F "tableau_workbook=@${{ github.workspace }}/Superstore.twb"
