@@ -1,4 +1,4 @@
-name: Tableau Workbook Workflows - Staging
+name: Staging
 
 on:
   pull_request:
@@ -57,23 +57,20 @@ jobs:
         run: |
           cat << EOF > publish-workbook.xml
           <tsRequest>
-            <workbook name="Superstore" showTabs="true" >
+            <workbook name="${{ secrets.WORKBOOK_NAME }}" showTabs="true" >
               <project id="${{ env.PROJECT_ID }}"/>
               <views>
-              <view name="Superstore" hidden="true" />
+                <view name="${{ secrets.WORKBOOK_NAME }}" hidden="true" />
               </views>
             </workbook>
           </tsRequest>
           EOF
 
-          cat publish-workbook.xml
+          curl -v --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks' \
+          -H "X-Tableau-Auth: ${{ env.TOKEN }}" \
+          -H "Content-Type: multipart/mixed; boundary=boundary-string" \
+          -F "request_payload=@publish-workbook.xml" \
+          -F "tableau_workbook=@${{ secrets.WORKBOOK_FILE }}"
 
-          pwd 
-
-          ls -la
-
-          curl -v --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks' \ 
-          --header 'X-Tableau-Auth: ${{ env.TOKEN }}' \
-          --header 'Content-Type: multipart/mixed; boundary=boundary-string' \
-          --data-binary "request_payload=@${{ github.workspace }}/publish-workbook.xml" \
-          --data-binary "tableau_workbook=@${{ github.workspace }}/Superstore.twb"
+      - name: Cleanning created files
+        run: rm publish-workbook.xml login.xml project.xml

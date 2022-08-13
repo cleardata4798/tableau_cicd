@@ -1,4 +1,4 @@
-name: Tableau Workbook Workflows - Production
+name: Production
 
 on:
   pull_request:
@@ -7,22 +7,71 @@ on:
     types: [closed]
 
 jobs:
-  tableau-production-publishing:
+  tableau-validation-action:
     name: Tableau Workbook Production Publisher
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     steps:
       - uses: actions/checkout@v2
 
-      - name: "Tableau Workbook Action - Production"
-        if: github.event.pull_request.merged == true
-        uses: jayamanikharyono/tableau-workbook-action@v1.4
-        env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          SITE_ID: ${{ secrets.SITE_ID }}
-          TABLEAU_URL: ${{ secrets.TABLEAU_URL }}
-        with:
-          workbook_dir: tableau_workbook/workbooks
-          env: production
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install XPATH
+        run: sudo apt-get install -y libxml-xpath-perl
+
+      - name: Tableau Login
+        run: |
+          curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.9/auth/signin' \
+          --header 'Content-Type: application/xml' \
+          --data-raw '<tsRequest>
+            <credentials name="${{ secrets.USERNAME }}" password="${{ secrets.PASSWORD }}">
+              <site contentUrl="${{ secrets.SITE }}" />
+            </credentials>
+          </tsRequest>' > login.xml
+
+          TOKEN=$(xpath -q -e "string(//@token)" login.xml)
+          SITE_ID=$(xpath -q -e "string(//site/@id)" login.xml)
+
+          echo "TOKEN=${TOKEN}" >> $GITHUB_ENV
+          echo "SITE_ID=${SITE_ID}" >> $GITHUB_ENV
+
+          echo "Login done with success"
+
+      - name: Create project PRODUCTION
+        run: |
+          curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.9/sites/${{ env.SITE_ID }}/projects' \
+          --header 'X-Tableau-Auth: ${{ env.TOKEN }}' \
+          --header 'Content-Type: application/xml' \
+          --data-raw '<tsRequest>
+            <project
+              name="PRODUCTION"
+              description="Production workbooks" />
+          </tsRequest>' > /dev/null 2>&1
+
+      - name: Get project id
+        run: |
+          curl --location --request GET '${{ secrets.TABLEAU_URL }}/api/3.9/sites/${{ env.SITE_ID }}/projects?filter=name:eq:PRODUCTION' \
+          --header 'X-Tableau-Auth: ${{ env.TOKEN }}' > project.xml
+
+          PROJECT_ID=$(xpath -q -e "string(//project/@id)" project.xml)
+
+          echo "PROJECT_ID=${PROJECT_ID}" >> $GITHUB_ENV
+
+      - name: Publish to PRODUCTION project
+        run: |
+          cat << EOF > publish-workbook.xml
+          <tsRequest>
+            <workbook name="${{ secrets.WORKBOOK_NAME }}" showTabs="true" >
+              <project id="${{ env.PROJECT_ID }}"/>
+              <views>
+                <view name="${{ secrets.WORKBOOK_NAME }}" hidden="true" />
+              </views>
+            </workbook>
+          </tsRequest>
+          EOF
+
+          curl -v --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks' \
+          -H "X-Tableau-Auth: ${{ env.TOKEN }}" \
+          -H "Content-Type: multipart/mixed; boundary=boundary-string" \
+          -F "request_payload=@publish-workbook.xml" \
+          -F "tableau_workbook=@${{ secrets.WORKBOOK_FILE }}"
+
+      - name: Cleanning created files
+        run: rm publish-workbook.xml login.xml project.xml
