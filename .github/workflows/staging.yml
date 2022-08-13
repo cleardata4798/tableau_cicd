@@ -66,6 +66,10 @@ jobs:
           </tsRequest>
           EOF
 
+          cat publish-workbook.xml
+
+          pwd 
+
           curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks' \ 
           --header 'X-Tableau-Auth: ${{ env.TOKEN }}' \
           --header 'Content-Type: multipart/mixed' \
