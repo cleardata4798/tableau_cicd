@@ -55,17 +55,19 @@ jobs:
 
       - name: Publish to STAGING project
         run: |
-          SUPERSTORE_TWB=$(cat Superstore.twb)
+          cat << EOF > publish-workbook.xml
+          <tsRequest>
+            <workbook name="Superstore" showTabs="true" >
+              <project id="${ PROJECT_ID }"/>
+              <views>
+              <view name="Superstore" hidden="true" />
+              </views>
+            </workbook>
+          </tsRequest>
+          EOF
 
-          curl --location --request POST "${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks" \ 
+          curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks' \ 
           --header 'X-Tableau-Auth: ${{ env.TOKEN }}' \
-          --header 'Content-Type: application/x-www-form-urlencoded' \
-          --data-urlencode 'request_payload=<tsRequest>
-              <workbook name="Superstore" showTabs="true" >
-                <project id="${ PROJECT_ID }"/>
-                <views>
-                <view name="Superstore" hidden="true" />
-                </views>
-              </workbook>
-            </tsRequest>' \
-          --data-urlencode 'tableau_workbook=${ SUPERSTORE_TWB }'
+          --header 'Content-Type: multipart/mixed;' \
+          -F "request_payload=@publish-workbook.xml" \
+          -F "tableau_workbook=@Superstore.twb"
