@@ -32,3 +32,40 @@ jobs:
           echo "SITE_ID=${SITE_ID}" >> $GITHUB_ENV
 
           echo "Login done with success"
+
+      - name: Create project STAGING
+        run: |
+          curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.9/sites/${{ env.SITE_ID }}/projects' \
+          --header 'X-Tableau-Auth: ${{ env.TOKEN }}' \
+          --header 'Content-Type: application/xml' \
+          --data-raw '<tsRequest>
+            <project
+              name="STAGING"
+              description="Staging workbooks" />
+          </tsRequest>' > /dev/null 2>&1
+
+      - name: Get project id
+        run: |
+          curl --location --request GET '${{ secrets.TABLEAU_URL }}/api/3.9/sites/${{ env.SITE_ID }}/projects?filter=name:eq:STAGING' \
+          --header 'X-Tableau-Auth: ${{ env.TOKEN }}' > project.xml
+
+          PROJECT_ID=$(xpath -q -e "string(//project/@id)" project.xml)
+
+          echo "PROJECT_ID=${PROJECT_ID}" >> $GITHUB_ENV
+
+      - name: Publish to STAGING project
+        run: |
+          SUPERSTORE_TWB=$(cat Superstore.twb)
+
+          curl --location --request POST "${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks" \ 
+          --header 'X-Tableau-Auth: ${{ env.TOKEN }}' \
+          --header 'Content-Type: application/x-www-form-urlencoded' \
+          --data-urlencode 'request_payload=<tsRequest>
+              <workbook name="Superstore" showTabs="true" >
+                <project id="${ PROJECT_ID }"/>
+                <views>
+                <view name="Superstore" hidden="true" />
+                </views>
+              </workbook>
+            </tsRequest>' \
+          --data-urlencode 'tableau_workbook=${ SUPERSTORE_TWB }'
