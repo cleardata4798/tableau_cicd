@@ -58,7 +58,7 @@ jobs:
           cat << EOF > publish-workbook.xml
           <tsRequest>
             <workbook name="Superstore" showTabs="true" >
-              <project id="${ env.PROJECT_ID }"/>
+              <project id="${{ env.PROJECT_ID }}"/>
               <views>
               <view name="Superstore" hidden="true" />
               </views>
