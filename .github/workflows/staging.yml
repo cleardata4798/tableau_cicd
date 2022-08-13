@@ -40,13 +40,13 @@ jobs:
           --header 'Content-Type: application/xml' \
           --data-raw '<tsRequest>
             <project
-              name="VALIDATION"
+              name="${{ secrets.STAGING_PROJECT }}"
               description="Staging workbooks" />
           </tsRequest>' > /dev/null 2>&1
 
       - name: Get project id
         run: |
-          curl --location --request GET '${{ secrets.TABLEAU_URL }}/api/3.9/sites/${{ env.SITE_ID }}/projects?filter=name:eq:STAGING' \
+          curl --location --request GET '${{ secrets.TABLEAU_URL }}/api/3.9/sites/${{ env.SITE_ID }}/projects?filter=name:eq:${{ secrets.STAGING_PROJECT }}' \
           --header 'X-Tableau-Auth: ${{ env.TOKEN }}' > project.xml
 
           PROJECT_ID=$(xpath -q -e "string(//project/@id)" project.xml)
