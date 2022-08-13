@@ -1,0 +1,76 @@
+name: Staging
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  tableau-validation-action:
+    name: Tableau Workbook Staging Publisher
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install XPATH
+        run: sudo apt-get install -y libxml-xpath-perl
+
+      - name: Tableau Login
+        run: |
+          curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.9/auth/signin' \
+          --header 'Content-Type: application/xml' \
+          --data-raw '<tsRequest>
+            <credentials name="${{ secrets.USERNAME }}" password="${{ secrets.PASSWORD }}">
+              <site contentUrl="${{ secrets.SITE }}" />
+            </credentials>
+          </tsRequest>' > login.xml
+
+          TOKEN=$(xpath -q -e "string(//@token)" login.xml)
+          SITE_ID=$(xpath -q -e "string(//site/@id)" login.xml)
+
+          echo "TOKEN=${TOKEN}" >> $GITHUB_ENV
+          echo "SITE_ID=${SITE_ID}" >> $GITHUB_ENV
+
+          echo "Login done with success"
+
+      - name: Create project STAGING
+        run: |
+          curl --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.9/sites/${{ env.SITE_ID }}/projects' \
+          --header 'X-Tableau-Auth: ${{ env.TOKEN }}' \
+          --header 'Content-Type: application/xml' \
+          --data-raw '<tsRequest>
+            <project
+              name="STAGING"
+              description="Staging workbooks" />
+          </tsRequest>' > /dev/null 2>&1
+
+      - name: Get project id
+        run: |
+          curl --location --request GET '${{ secrets.TABLEAU_URL }}/api/3.9/sites/${{ env.SITE_ID }}/projects?filter=name:eq:STAGING' \
+          --header 'X-Tableau-Auth: ${{ env.TOKEN }}' > project.xml
+
+          PROJECT_ID=$(xpath -q -e "string(//project/@id)" project.xml)
+
+          echo "PROJECT_ID=${PROJECT_ID}" >> $GITHUB_ENV
+
+      - name: Publish to STAGING project
+        run: |
+          cat << EOF > publish-workbook.xml
+          <tsRequest>
+            <workbook name="${{ secrets.WORKBOOK_NAME }}" showTabs="true" >
+              <project id="${{ env.PROJECT_ID }}"/>
+              <views>
+                <view name="${{ secrets.WORKBOOK_NAME }}" hidden="true" />
+              </views>
+            </workbook>
+          </tsRequest>
+          EOF
+
+          curl -v --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks?overwrite=true' \
+          -H "X-Tableau-Auth: ${{ env.TOKEN }}" \
+          -H "Content-Type: multipart/mixed; boundary=boundary-string" \
+          -F "request_payload=@publish-workbook.xml" \
+          -F "tableau_workbook=@${{ secrets.WORKBOOK_FILE }}"
+
+      - name: Cleanning created files
+        run: rm publish-workbook.xml login.xml project.xml
