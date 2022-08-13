@@ -66,6 +66,14 @@ jobs:
           </tsRequest>
           EOF
 
+          # creates a new one if not exists
+          curl -v --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks?overwrite=false' \
+          -H "X-Tableau-Auth: ${{ env.TOKEN }}" \
+          -H "Content-Type: multipart/mixed; boundary=boundary-string" \
+          -F "request_payload=@publish-workbook.xml" \
+          -F "tableau_workbook=@${{ secrets.WORKBOOK_FILE }}"
+
+          # assure to upload latest version (overwriting)
           curl -v --location --request POST '${{ secrets.TABLEAU_URL }}/api/3.4/sites/${{ env.SITE_ID }}/workbooks?overwrite=true' \
           -H "X-Tableau-Auth: ${{ env.TOKEN }}" \
           -H "Content-Type: multipart/mixed; boundary=boundary-string" \
