@@ -12,3 +12,5 @@ To setup the workflows you need to define the following secrets in github action
 | PASSWORD      | Your password                                                                           |
 | WORKBOOK_NAME | The workbook name. EX: "Superstore"                                                     |
 | WORKBOOK_FILE | The workbook filename with relative path. EX: "Superstore.twb" or "workbooks/Test.twbx" |
+
+:)
