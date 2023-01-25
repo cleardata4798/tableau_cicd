@@ -1,0 +1,48 @@
+name: Project Publisher
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  scan_projects:
+    name: Scan Project Files
+    runs-on: ubuntu-latest
+    outputs:
+      files: ${{ steps.changed-files-specific.outputs.all_changed_files }}
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Get changed files in the projects folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v35
+        with:
+          json: true
+          json_raw_format: true
+          files: projects/*.yml
+
+      - name: List all changed files
+        run: |
+          for file in ${{ steps.changed-files-specific.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
+
+  publish_to_staging:
+    name: Publish to Staging
+    needs: scan_projects
+    uses: ./.github/workflows/staging.yml
+    secrets: inherit
+    with:
+      files: ${{ needs.scan_projects.outputs.files }}
+
+  publishing_to_prod:
+    name: Publish to Production
+    needs: 
+      - scan_projects
+      - publish_to_staging
+    uses: ./.github/workflows/production.yml
+    secrets: inherit
+    with:
+      files: ${{ needs.scan_projects.outputs.files }}

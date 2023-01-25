@@ -1,0 +1,4 @@
+WORKBOOK_NAME: Superstore
+WORKBOOK_FILE: Superstore.twb
+PRODUCTION_PROJECT: Superstore
+STAGING_PROJECT: Superstore_Staging_1
