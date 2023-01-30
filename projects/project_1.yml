@@ -1,4 +1,4 @@
-WORKBOOK_NAME: Superstore
-WORKBOOK_FILE: Superstore.twb
+WORKBOOK_NAME: Test
+WORKBOOK_FILE: Test.twbx
 PRODUCTION_PROJECT: Superstore
 STAGING_PROJECT: Superstore_Staging_3
